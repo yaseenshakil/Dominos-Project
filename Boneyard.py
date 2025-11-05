@@ -44,4 +44,3 @@ class Boneyard():
             boolean: return true if boneyard is empty otherwise false
         """
         return len(self.boneyard) == 0 
-    
