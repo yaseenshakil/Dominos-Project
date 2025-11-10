@@ -1,15 +1,16 @@
 
 from Player import Player
+from Board import Board
 class Game(): 
     """
     Game Class to simulate game. Should contain function for possible actions for player, state, players hand, opponent players hand
     """
 
     ## Boilerplate initial function template
-    def __init__(self, player: Player, opponent: Player):
+    def __init__(self, player: Player, opponent: Player, board: Board):
         self.player = player
         self.opponent = opponent
-        self.board = []
+        self.board = board
 
 
     def is_terminal(self):
@@ -25,10 +26,11 @@ class Game():
             Array of possible moves: Returns an array of tuple (tile: tuple, index) i.e. tiles that player can play and on what end to play those tiles
         """
         result = []
-        if (len(self.board) == 0): 
+        board_tiles = self.board.get_board_tiles()
+        if (len(board_tiles) == 0): 
             result = [(tile, 0) for tile in player.get_hand()]
         else:
-            tile_option = [self.board[0][0], self.board[-1][1]]
+            tile_option = [board_tiles[0][0], board_tiles[-1][1]]
             for player_tile in player.get_hand():
                 if (player_tile[0] == tile_option[0] or player_tile[1] == tile_option[0]): 
                     ## Add Tile to start of baord (left side) 
