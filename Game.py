@@ -9,19 +9,40 @@ class Game():
     def __init__(self, player: Player, opponent: Player):
         self.player = player
         self.opponent = opponent
-        self.players_hand = []
-        self.opponents_hand = []
-        self.board = [[(0,0)]]
+        self.board = []
 
 
     def is_terminal(self):
-        return (self.players_hand == [] or self.opponents_hand == [])
+        return (self.player.get_hand() == [] or self.opponent.get_hand() == [])
+    
+    def get_possible_moves(self, player: Player):
+        """Get Possible Moves for a player
+
+        Args:
+            player (Player Object): a player of type player is provided
+
+        Returns:
+            Array of possible moves: Returns an array of tuple (tile: tuple, index) i.e. tiles that player can play and on what end to play those tiles
+        """
+        result = []
+        if (len(self.board) == 0): 
+            result = [(tile, 0) for tile in player.get_hand()]
+        else:
+            tile_option = [self.board[0][0], self.board[-1][1]]
+            for player_tile in player.get_hand():
+                if (player_tile[0] == tile_option[0] or player_tile[1] == tile_option[0]): 
+                    ## Add Tile to start of baord (left side) 
+                    result.append((player_tile, 0))
+                elif (player_tile[0] == tile_option[1] or player_tile[1] == tile_option[1]): 
+                    ## Add Tile to end of board (right side)
+                    result.append((player_tile, -1))
+        return result
     
     def utility_score(self): 
         if (self.is_terminal()):
             sum = 0
-            sum += self.sum_tiles(self.player)
-            sum -= self.sum_tiles(self.opponent)
+            sum += self.sum_tiles(self.opponent)
+            sum -= self.sum_tiles(self.player)
 
             return sum
         
@@ -30,17 +51,6 @@ class Game():
         for tile in player.get_hand():
             sum += tile[0] + tile[1]
         return sum
-
-    def get_possible_moves(self, player): 
-        """Currently incomplete | get possible moves function
-
-        Args:
-            player (_type_): _description_
-
-        Returns:
-            Array of possible moves: Returns an array of moves i.e. tiles that player can play and on what end to play those tiles
-        """
-        return []
         
     def eval(self): 
         ## Possible considerations for evaluation function: Player having low numbered tiles combined with probabilistic guessing of opponent tiles, Checking number of possible player moves, Tile Count Difference between Player and Opponent, 
