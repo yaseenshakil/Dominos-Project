@@ -3,7 +3,7 @@ from Player import Player
 from Board import Board
 
 class Match(): 
-    """Class to represent a match between to agents/players
+    """Class to represent a match between two agents/players
     """
 
     """
