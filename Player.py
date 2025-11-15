@@ -1,5 +1,6 @@
 from game_types import Domino, Tail, Move
 from Board import Board
+import random
 
 class Player(): 
     """Class to describe the basic elements of any player/agent
@@ -61,6 +62,16 @@ class Player():
         """ Add round score to the total score of the player
         """
         self.score += round_score
+
+    def move(self, board : Board) -> Move | None:
+        # A player defaults to make a random move
+        # From the list of possible moves
+        # If no possible move return None
+        moves = self.possible_moves(board)
+        if moves:
+            return random.choice(moves)
+        else:
+            return None
     
 # Testing Section   
 if __name__ == "__main__":

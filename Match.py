@@ -69,7 +69,20 @@ class Match():
         # Ordering list according to priority rules
         priority_order.sort(key = lambda tile: (tile[0] + tile[-1]) + (100 if tile[0] == tile[-1] else 1), reverse=True)
 
-        print(priority_order)
+        # Determine who goes first
+        first_player = 1
+        hand_1 = self.player_1.get_hand()
+        hand_2 = self.player_2.get_hand()
+        for tile in priority_order:
+            if tile in hand_1:
+                # If the player 1 has the priority tile, 
+                # then player 1 is first (default)
+                break
+            elif tile in hand_2:
+                # If the player 2 has the priority tile, 
+                # then player 2 is first
+                first_player = 2
+                break
 
 
 
