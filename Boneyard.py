@@ -49,3 +49,19 @@ class Boneyard():
     def restart_boneyard(self):
         # Re-initialize Boneyard
         self.__init__()
+
+# Testing Section   
+if __name__ == "__main__":
+    print("------------------------")
+    print("Testing Boneyard Class")
+    boneyard = Boneyard()
+    boneyard.print_boneyard_tiles()
+    print(boneyard.generate_random_hand())
+    boneyard.print_boneyard_tiles()
+    print(boneyard.generate_random_hand())
+    boneyard.print_boneyard_tiles()
+    print(boneyard.generate_random_tile())
+    boneyard.print_boneyard_tiles()
+    boneyard.restart_boneyard()
+    boneyard.print_boneyard_tiles()
+    print("------------------------")

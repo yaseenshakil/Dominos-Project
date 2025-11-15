@@ -1,3 +1,4 @@
+from game_types import Domino, Tail, Move
 from Boneyard import Boneyard
 from Player import Player
 from Board import Board
@@ -52,6 +53,27 @@ class Match():
                 double_count += 1
 
         return double_count < 5
+    
+    def play(self):
+        """Game Rules and executing the game
+        """
+
+        # The player with the highest double starts
+        # If no player has a double, then the highest numbered
+        # Tile goes first
+        # Conversation is allowed to find out who is first
+
+        # Order of domino tiles (which tile goes first)
+        priority_order : list[Domino] = [] 
+        
+        # Adding tiles to priority order
+        # Doubles
+        for i in range(6,0,-1):
+            priority_order.append((i,i))
+
+
+
+
     
     
 
