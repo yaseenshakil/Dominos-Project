@@ -1,17 +1,83 @@
+from game_types import Domino, Tail, Move
+
 class Board(): 
     
     def __init__(self):
-        self.board = []
+        self.board : list[Domino] = []
 
-    def add_to_board(self, move: tuple[tuple[int, int], int]): 
-        if (move[-1] != -1 or move[-1] != 0): 
-            raise TypeError(f"Invalid Move Provided to add_to_board function: {move}")
-        else: 
-            self.board.insert(move[-1], move[0])
+    def add_to_board(self, move: Move): 
+        # Type control by defining Tail
+        
+        # Extracting information from input
+        tile = move[0]
+        tail = move[-1]
+
+        # No repeating tiles
+        if tile in self.board or (tile[-1], tile[0]) in self.board:
+            raise TypeError("No repeating domino tiles allowed")
+
+        # Ensuring order
+        # If necessary, Domino pieces will be flipped to match the ends
+        if self.board == []:
+            # Empty boards can have insertions as they come
+            self.append_tile(tail, tile)
+        else:
+            # Check if any of the number on the tile match the chosen tail
+            tail_number = self.get_tails(tail)
+            if tail_number in tile:
+                # The tile can be added to the board
+
+                # Flipping if necessary
+                if tile[tail] == tail_number:
+                    # To add a tile to the tail (0), tile[-1] must be equal to the tail number
+                    # To add a tile to the tail (-1), tile[0] must be equal to the tail number
+                    # If the opposite is true, the domino tile must be flipped
+                    tile = (tile[-1], tile[0])
+
+                self.append_tile(tail, tile)
+            else:
+                # Invalid move
+                raise TypeError("Invalid Move")
 
     def print_board(self): 
-        print(f"------Domino Board--------\n {self.board}\n")
+        print(f"------Domino Board--------")
+        for tile in self.board:
+            print(f"{tile}", end="")
+        print()
     
-    def get_board_tiles(self): 
+    def get_board_tiles(self) -> list[Domino]: 
         return self.board
     
+    def get_tails(self, tail : Tail | None = None) -> int | tuple[int, int]:
+        if tail == None:
+            # Return both tails
+            return (self.board[0][0], self.board[-1][-1])
+        else:
+            # Return specified tail
+            return self.board[tail][tail]
+    
+    def append_tile(self, tail : Tail, tile : Domino):
+        if tail == 0:
+            # Append at the start
+            self.board.insert(0, tile)
+        else:
+            # Append at the end
+            self.board.append(tile)
+
+# Testing Section   
+if __name__ == "__main__":
+    print("------------------------")
+    print("Testing Board Class")
+    board = Board()
+    board.print_board()
+    board.add_to_board(((1,1), -1))
+    board.print_board()
+    board.add_to_board(((2,1), 0))
+    board.print_board()
+    board.add_to_board(((1,3), -1))
+    board.print_board()
+    board.add_to_board(((3,2), 0))
+    board.print_board()
+    board.add_to_board(((3,3), -1))
+    board.print_board()
+    print("------------------------")
