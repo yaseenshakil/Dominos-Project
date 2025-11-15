@@ -74,7 +74,7 @@ class Player():
             total += x + y
         return total
     
-    def move(self, board : Board) -> Move | None:
+    def move(self, board : Board, boneyard_size : int) -> Move | None:
         # A player defaults to make a random move
         # From the list of possible moves
         # If no possible move return None

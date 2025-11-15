@@ -2,6 +2,7 @@ from game_types import Domino, Tail, Move
 from Boneyard import Boneyard
 from Player import Player
 from Board import Board
+from HumanPlayer import HumanPlayer
 
 class Match(): 
     """Class to represent a match between two agents/players
@@ -79,22 +80,28 @@ class Match():
         second_player = self.player_2
         hand_1 = self.player_1.get_hand()
         hand_2 = self.player_2.get_hand()
+        starting_tile = None
         for tile in priority_order:
             if tile in hand_1:
                 # If the player 1 has the priority tile, 
                 # then player 1 is first (default)
+                starting_tile = tile
                 break
             elif tile in hand_2:
                 # If the player 2 has the priority tile, 
                 # then player 2 is first
                 first_player = self.player_2
                 second_player = self.player_1
+                starting_tile = tile
                 break
+        
+        # Make the first move
+        self.take_move(first_player, (starting_tile, 0))
         
         # Start the game
         while not self.terminal_state():
-            # First player takes a move
-            self.take_turn(first_player)
+            # Second player takes a move
+            self.take_turn(second_player)
 
             # Display board
             if self.display:
@@ -104,8 +111,8 @@ class Match():
             if self.terminal_state():
                 break
 
-            # Second player takes a move
-            self.take_turn(second_player)
+            # First player takes a move
+            self.take_turn(first_player)
 
             # Display board
             if self.display:
@@ -139,7 +146,7 @@ class Match():
     
     def take_turn(self, player : Player):
         # Choose a move
-        move = player.move(self.board)
+        move = player.move(self.board, len(self.boneyard.boneyard))
 
         if move:
             # If there is a move (not None)
@@ -151,7 +158,7 @@ class Match():
             while not self.boneyard.is_boneyard_empty() and move == None:
                 new_tile = self.boneyard.generate_random_tile()
                 player.add_hand(new_tile)
-                move = player.move(self.board)
+                move = player.move(self.board, len(self.boneyard.boneyard))
             
             if move:
                 # If possible move, then take it
@@ -191,21 +198,32 @@ class Match():
 if __name__ == "__main__":
     print("------------------------")
     print("Testing Match Class")
+    test_number = int(input("Test #: "))
 
-    print("Initialization")
-    p1 = Player()
-    p2 = Player()
-    m = Match(p1, p2)
-    m.board.print_board()
-    print("Boneyard")
-    m.boneyard.print_boneyard_tiles()
-    print(f"P1: {m.player_1.hand}")
-    print(f"P2: {m.player_2.hand}")
-    print()
+    if test_number == 1:
+        print("Initialization")
+        p1 = Player()
+        p2 = Player()
+        m = Match(p1, p2)
+        m.board.print_board()
+        print("Boneyard")
+        m.boneyard.print_boneyard_tiles()
+        print(f"P1: {m.player_1.hand}")
+        print(f"P2: {m.player_2.hand}")
+        print()
 
-    m.play()
-    m.boneyard.print_boneyard_tiles()
-    print(f"P1: {m.player_1.hand}")
-    print(f"P2: {m.player_2.hand}")
+        m.play()
+        m.boneyard.print_boneyard_tiles()
+        print(f"P1: {m.player_1.hand}")
+        print(f"P2: {m.player_2.hand}")
+    
+    if test_number == 2:
+        p1 = HumanPlayer()
+        p2 = Player()
+        m = Match(p1, p2)
+        m.play()
+        m.boneyard.print_boneyard_tiles()
+        print(f"P1: {m.player_1.hand}")
+        print(f"P2: {m.player_2.hand}")
 
     print("------------------------")
