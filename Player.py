@@ -5,10 +5,11 @@ import random
 class Player(): 
     """Class to describe the basic elements of any player/agent
     """
-    def __init__(self): 
+    def __init__(self, name : str = "BasicPlayer"): 
         self.hand : list[Domino] = []
         self.score : int = 0
         self.total_win : int = 0
+        self.name = name
 
         # Useful information for a player to know
         # Order of domino tiles (which tile goes first)
@@ -60,9 +61,10 @@ class Player():
         return moves
 
     def add_score(self, round_score : int):
-        """ Add round score to the total score of the player
+        """ Add round score to the total score of the player, and a win
         """
         self.score += round_score
+        self.total_win += 1
 
     def hand_score(self):
         """ Return total score of the hand
