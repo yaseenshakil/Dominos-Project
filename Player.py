@@ -8,6 +8,7 @@ class Player():
     def __init__(self): 
         self.hand : list[Domino] = []
         self.score : int = 0
+        self.total_win : int = 0
 
         # Useful information for a player to know
         # Order of domino tiles (which tile goes first)
