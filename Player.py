@@ -8,6 +8,12 @@ class Player():
         self.hand : list[Domino] = []
         self.score : int = 0
 
+        # Useful information for a player to know
+        # Order of domino tiles (which tile goes first)
+        self.priority_order : list[Domino] = [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 3), (3, 4), (3, 5), (3, 6), (4, 4), (4, 5), (4, 6), (5, 5), (5, 6), (6, 6)]
+        # Ordering list according to priority rules
+        self.priority_order.sort(key = lambda tile: (tile[0] + tile[-1]) + (100 if tile[0] == tile[-1] else 1), reverse=True)
+
     def get_hand(self) -> list[Domino]: 
         # Returns the player's hand
         return self.hand

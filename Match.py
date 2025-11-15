@@ -67,8 +67,9 @@ class Match():
         priority_order : list[Domino] = [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (3, 3), (3, 4), (3, 5), (3, 6), (4, 4), (4, 5), (4, 6), (5, 5), (5, 6), (6, 6)]
         
         # Ordering list according to priority rules
-        priority_order.sort(key = lambda tile: (tile[0] + tile[-1]) * (100 if tile[0] == tile[-1] else 1))
+        priority_order.sort(key = lambda tile: (tile[0] + tile[-1]) + (100 if tile[0] == tile[-1] else 1), reverse=True)
 
+        print(priority_order)
 
 
 
@@ -76,3 +77,22 @@ class Match():
     
     
 
+# Testing Section   
+if __name__ == "__main__":
+    print("------------------------")
+    print("Testing Match Class")
+
+    print("Initialization")
+    p1 = Player()
+    p2 = Player()
+    m = Match(p1, p2)
+    m.board.print_board()
+    print("Boneyard")
+    m.boneyard.print_boneyard_tiles()
+    print(f"P1: {m.player_1.hand}")
+    print(f"P2: {m.player_2.hand}")
+    print()
+
+    m.play()
+
+    print("------------------------")
