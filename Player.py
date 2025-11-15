@@ -63,6 +63,14 @@ class Player():
         """
         self.score += round_score
 
+    def hand_score(self):
+        """ Return total score of the hand
+        """
+        total = 0
+        for x, y in self.hand:
+            total += x + y
+        return total
+    
     def move(self, board : Board) -> Move | None:
         # A player defaults to make a random move
         # From the list of possible moves
