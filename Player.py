@@ -6,6 +6,7 @@ class Player():
     """
     def __init__(self): 
         self.hand = []
+        self.score = 0
 
     def get_hand(self) -> list[Domino]: 
         return self.hand
@@ -34,4 +35,9 @@ class Player():
                 moves.append((tile, -1))
 
         return moves
+
+    def add_score(self, round_score : int):
+        """ Add round score to the total score of the player
+        """
+        self.score += round_score
     
