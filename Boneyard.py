@@ -28,6 +28,7 @@ class Boneyard():
             tuple: A singular tile
         """
         if len(self.boneyard) == 0:
+            print("Warning: Requested tile from an empty boneyard")
             return None
         random_tile = random.choice(self.boneyard)
         self.boneyard.remove(random_tile)
