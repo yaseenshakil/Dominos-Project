@@ -18,7 +18,7 @@ class Board():
 
         # Ensuring order
         # If necessary, Domino pieces will be flipped to match the ends
-        if self.board == []:
+        if self.is_empty():
             # Empty boards can have insertions as they come
             self.append_tile(tail, tile)
         else:
@@ -49,6 +49,9 @@ class Board():
         return self.board
     
     def get_tails(self, tail : Tail | None = None) -> int | tuple[int, int]:
+        # Get the tails of the board, or return empty list if none
+        if self.is_empty():
+            return []
         if tail == None:
             # Return both tails
             return (self.board[0][0], self.board[-1][-1])
@@ -63,6 +66,9 @@ class Board():
         else:
             # Append at the end
             self.board.append(tile)
+    
+    def is_empty(self) -> bool:
+        return len(self.board) == 0
 
 # Testing Section   
 if __name__ == "__main__":
@@ -70,6 +76,7 @@ if __name__ == "__main__":
     print("Testing Board Class")
     board = Board()
     board.print_board()
+    print(board.get_tails())
     board.add_to_board(((1,1), -1))
     board.print_board()
     board.add_to_board(((2,1), 0))
