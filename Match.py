@@ -19,21 +19,17 @@ class Match():
     """
 
     # Initialization of a match
-    def __init__(self, player_1: Player, player_2: Player):
+    def __init__(self, player_1: Player, player_2: Player, display : bool = True):
         self.player_1 = player_1
         self.player_2 = player_2
         self.board = Board()
         self.boneyard = Boneyard()
+        self.display = display
 
-        # Each player is dealt a hand
-        self.player_1.set_hand(self.boneyard.generate_random_hand())
-        self.player_2.set_hand(self.boneyard.generate_random_hand())
-
-        # Repeat until hands are valid
-        while not self.valid_hands():
-            self.boneyard.restart_boneyard()
-            self.player_1.set_hand(self.boneyard.generate_random_hand())
-            self.player_2.set_hand(self.boneyard.generate_random_hand())
+        # Check names, and make them unique
+        if player_1.name == player_2.name:
+            player_1.name += "_1"
+            player_2.name += "_2"
 
     def valid_hands(self) -> bool:
         """
@@ -57,6 +53,15 @@ class Match():
     def play(self):
         """Game Rules and executing the game
         """
+        # Each player is dealt a hand
+        self.player_1.set_hand(self.boneyard.generate_random_hand())
+        self.player_2.set_hand(self.boneyard.generate_random_hand())
+
+        # Repeat until hands are valid
+        while not self.valid_hands():
+            self.boneyard.restart_boneyard()
+            self.player_1.set_hand(self.boneyard.generate_random_hand())
+            self.player_2.set_hand(self.boneyard.generate_random_hand())
 
         # The player with the highest double starts
         # If no player has a double, then the highest numbered
@@ -70,7 +75,8 @@ class Match():
         priority_order.sort(key = lambda tile: (tile[0] + tile[-1]) + (100 if tile[0] == tile[-1] else 1), reverse=True)
 
         # Determine who goes first
-        first_player = 1
+        first_player = self.player_1
+        second_player = self.player_2
         hand_1 = self.player_1.get_hand()
         hand_2 = self.player_2.get_hand()
         for tile in priority_order:
@@ -81,8 +87,99 @@ class Match():
             elif tile in hand_2:
                 # If the player 2 has the priority tile, 
                 # then player 2 is first
-                first_player = 2
+                first_player = self.player_2
+                second_player = self.player_1
                 break
+        
+        # Start the game
+        while not self.terminal_state():
+            # First player takes a move
+            self.take_turn(first_player)
+
+            # Display board
+            if self.display:
+                self.board.print_board()
+
+            # Check if terminal
+            if self.terminal_state():
+                break
+
+            # Second player takes a move
+            self.take_turn(second_player)
+
+            # Display board
+            if self.display:
+                self.board.print_board()
+
+        # The winner is the player with the empty and or with the lowest hand score
+        # If both players have the same hand score, then it's a tie
+        # If a player wins, then the score of the other player is added to their total score
+        p1_score = first_player.hand_score()
+        p2_score = second_player.hand_score()
+        if p1_score < p2_score:
+            # First player wins
+            first_player.add_score(p2_score)
+            if self.display:
+                # Show winner and current scores
+                print(f"Match Over: {first_player.name} wins")
+                print(f"Current Scores -> {first_player.name} : {first_player.score} | {second_player.name} : {second_player.score}")
+            return first_player.name
+        elif p2_score < p1_score:
+            # Second player wins
+            second_player.add_score(p1_score)
+            if self.display:
+                print(f"Match Over: {second_player.name} wins")
+                print(f"Current Scores -> {first_player.name} : {first_player.score} | {second_player.name} : {second_player.score}")
+            return second_player.name
+        else:
+            # Tie
+            if self.display:
+                print("Match Over: Tie")
+            return "Tie"
+    
+    def take_turn(self, player : Player):
+        # Choose a move
+        move = player.move(self.board)
+
+        if move:
+            # If there is a move (not None)
+            # Then take the move
+            self.take_move(player, move)     
+        else:
+            # If no possible move and the boneyard is not empty
+            # Then add new tile from boneyard and check again
+            while not self.boneyard.is_boneyard_empty() and move == None:
+                new_tile = self.boneyard.generate_random_tile()
+                player.add_hand(new_tile)
+                move = player.move(self.board)
+            
+            if move:
+                # If possible move, then take it
+                self.take_move(player, move) 
+            else:
+                # Pass
+                if self.display:
+                    print("No possible moves and empty boneyard")
+
+    
+    def take_move(self, player : Player, move : Move):
+        # Taking a move implies:
+        self.board.add_to_board(move) # Adding tile to the board
+        player.use_tile(move[0]) #Removing tile from hand
+
+    def terminal_state(self) -> bool:
+        if len(self.player_1.get_hand()) == 0 or len(self.player_2.get_hand()) == 0:
+            # A match can end if any player has an empty hand
+            return True
+        elif self.boneyard.is_boneyard_empty() and len(self.player_1.possible_moves(self.board)) == 0 and len(self.player_2.possible_moves(self.board)) == 0:
+            # A match can end if the boneyard is empty and none of the players have possible moves
+            return True
+        else:
+            # Else the game is not over
+            return False
+        
+
+
 
 
 
@@ -107,5 +204,8 @@ if __name__ == "__main__":
     print()
 
     m.play()
+    m.boneyard.print_boneyard_tiles()
+    print(f"P1: {m.player_1.hand}")
+    print(f"P2: {m.player_2.hand}")
 
     print("------------------------")
