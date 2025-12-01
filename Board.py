@@ -69,6 +69,11 @@ class Board():
     
     def is_empty(self) -> bool:
         return len(self.board) == 0
+    
+    def copy(self): 
+        new_board = Board()
+        new_board.board = self.board.copy()
+        return new_board
 
 # Testing Section   
 if __name__ == "__main__":

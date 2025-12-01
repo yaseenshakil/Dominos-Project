@@ -1,6 +1,7 @@
-from game_types import Domino, Tail, Move
+from game_types import Domino, Tail, Move, NUMBER_OF_TILES
 from Board import Board
 import random
+
 
 class Player(): 
     """Class to describe the basic elements of any player/agent
@@ -83,7 +84,6 @@ class Player():
             return random.choice(moves)
         else:
             return None
-    
 # Testing Section   
 if __name__ == "__main__":
     print("------------------------")

@@ -48,6 +48,7 @@ class Game():
 
             return sum
         
+        
     def sum_tiles(self, player: Player): 
         sum = 0
         for tile in player.get_hand():
