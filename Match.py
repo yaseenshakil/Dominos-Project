@@ -3,6 +3,7 @@ from Boneyard import Boneyard
 from Player import Player
 from Board import Board
 from HumanPlayer import HumanPlayer
+from ExpectiMinimaxPlayer import ExpectiMinimaxPlayer
 
 class Match(): 
     """Class to represent a match between two agents/players
@@ -225,5 +226,15 @@ if __name__ == "__main__":
         m.boneyard.print_boneyard_tiles()
         print(f"P1: {m.player_1.hand}")
         print(f"P2: {m.player_2.hand}")
+
+    if test_number == 3:
+        p1 = ExpectiMinimaxPlayer()
+        p2 = Player()
+        m = Match(p1,p2)
+        m.play()
+        m.boneyard.print_boneyard_tiles()
+        print(f"P1: {m.player_1.hand}")
+        print(f"P2: {m.player_2.hand}")
+
 
     print("------------------------")

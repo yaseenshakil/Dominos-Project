@@ -1,4 +1,5 @@
 from game_types import Domino, Tail, Move
+from typing import List
 
 class Board(): 
     
@@ -69,6 +70,40 @@ class Board():
     
     def is_empty(self) -> bool:
         return len(self.board) == 0
+    
+
+    def get_moves_for_tiles(self, domino: Domino) -> List[Move]:
+        """
+        Return list of legal moves for the given domino on this board.
+        Each move is a tuple (tile, tail) where tail is 0 (left) or -1 (right).
+        This implementation DOES NOT call get_tails() to avoid depending on its return type.
+        """
+        moves: List[Move] = []
+
+        # Empty board: conventionally allow placing on the left (0)
+        if self.is_empty():
+            moves.append((domino, 0))
+            return moves
+
+        # Safely read the left and right end values directly from the board list
+        # left_value = leftmost tile's left number
+        # right_value = rightmost tile's right number
+        left_value = self.board[0][0]
+        right_value = self.board[-1][-1]
+
+        a, b = domino
+
+        # playable on left?
+        if a == left_value or b == left_value:
+            moves.append((domino, 0))
+
+        # playable on right?
+        if a == right_value or b == right_value:
+            moves.append((domino, -1))
+
+        return moves
+
+
     
     def copy(self): 
         new_board = Board()
