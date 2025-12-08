@@ -3,7 +3,11 @@ from Boneyard import Boneyard
 from Player import Player
 from Board import Board
 from HumanPlayer import HumanPlayer
+<<<<<<< HEAD
 from ExpectiMinimaxPlayer import ExpectiMinimaxPlayer
+=======
+from MonteCarloPlayer import MonteCarloPlayer
+>>>>>>> 505f53c0f49074d1e3c5f9cf1f3ba91f6aac39bd
 
 class Match(): 
     """Class to represent a match between two agents/players
@@ -55,6 +59,10 @@ class Match():
     def play(self):
         """Game Rules and executing the game
         """
+        # Initialize the board and boneyard
+        self.board = Board()
+        self.boneyard = Boneyard()
+
         # Each player is dealt a hand
         self.player_1.set_hand(self.boneyard.generate_random_hand())
         self.player_2.set_hand(self.boneyard.generate_random_hand())
@@ -231,6 +239,7 @@ if __name__ == "__main__":
         print(f"P2: {m.player_2.hand}")
 
     if test_number == 3:
+<<<<<<< HEAD
         p1_wins = 0
         p2_wins = 0
         for game in range(run_times):
@@ -247,5 +256,153 @@ if __name__ == "__main__":
                 p2_wins += 1
         print(f"Player 1 Expectiminimax won: {p1_wins} times and Player 2 Random won: {p2_wins} times out of a total of {run_times} games")
 
+=======
+        p1 = MonteCarloPlayer()
+        p2 = Player()
+        m = Match(p1, p2)
+        m.play()
+        m.boneyard.print_boneyard_tiles()
+        print(f"P1: {m.player_1.hand}")
+        print(f"P2: {m.player_2.hand}")
+    
+    if test_number == 4:
+        p1 = MonteCarloPlayer()
+        p2 = Player()
+        m = Match(p1, p2, False)
+        for i in range(10):
+            print(f"\nMatch #{i}")
+            m.play()
+            m.boneyard.print_boneyard_tiles()
+            print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
+            print(f"P2: {m.player_2.hand}, Score: {m.player_2.score}")
+    
+    if test_number == 5:
+        # Match until score = 200
+        p1 = MonteCarloPlayer()
+        p2 = Player()
+        m = Match(p1, p2, False)
+        i = 1
+        while p1.score < 200 and p2.score < 200:
+            print(f"\nMatch #{i}")
+            result = m.play()
+            print(f"Result: {result}")
+            m.boneyard.print_boneyard_tiles()
+            print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
+            print(f"P2: {m.player_2.hand}, Score: {m.player_2.score}")
+            i += 1
+        
+        print()
+        if p1.score >= 200:
+            print(f"{p1.name} is the winner")
+        else:
+            print(f"{p2.name} is the winner")
+    
+    if test_number == 6:
+        # Match until score = 200
+        p1 = MonteCarloPlayer(n = 10000)
+        p2 = Player()
+        m = Match(p1, p2, False)
+        i = 1
+        while p1.score < 200 and p2.score < 200:
+            print(f"\nMatch #{i}")
+            result = m.play()
+            print(f"Result: {result}")
+            m.boneyard.print_boneyard_tiles()
+            print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
+            print(f"P2: {m.player_2.hand}, Score: {m.player_2.score}")
+            i += 1
+        
+        print()
+        if p1.score >= 200:
+            print(f"{p1.name} is the winner")
+        else:
+            print(f"{p2.name} is the winner")
+    
+    if test_number == 7:
+        games = 10
+        p1_match = 0
+        p2_match = 0
+        p1_game = 0
+        p2_game = 0
+        matches = 0
+        for _ in range(games):
+            # Match until score = 200
+            p1 = MonteCarloPlayer()
+            p2 = Player()
+            m = Match(p1, p2, False)
+            i = 1
+            while p1.score < 200 and p2.score < 200:
+                matches += 1
+                print(f"\nMatch #{i}")
+                result = m.play()
+                print(f"Result: {result}")
+                m.boneyard.print_boneyard_tiles()
+                print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
+                print(f"P2: {m.player_2.hand}, Score: {m.player_2.score}")
+                if result == p1.name:
+                    p1_match += 1
+                if result == p2.name:
+                    p2_match += 1
+                i += 1
+
+            print()
+            if p1.score >= 200:
+                print(f"{p1.name} is the winner")
+                p1_game += 1
+            else:
+                print(f"{p2.name} is the winner")
+                p2_game += 1
+            
+        print("\n Match Stats")
+        print(f"P1 Match Winning Ratio: {p1_match / matches} after playing {matches} matches")
+        print(f"P2 Match Winning Ratio: {p2_match / matches} after playing {matches} matches")
+
+        print("\n Game Stats")
+        print(f"P1 Game Winning Ratio: {p1_game / games} after playing {games} games")
+        print(f"P2 Game Winning Ratio: {p2_game / games} after playing {games} games")
+
+    if test_number == 8:
+        games = 100
+        p1_match = 0
+        p2_match = 0
+        p1_game = 0
+        p2_game = 0
+        matches = 0
+        for _ in range(games):
+            # Match until score = 200
+            p1 = MonteCarloPlayer(n = 2000)
+            p2 = Player()
+            m = Match(p1, p2, False)
+            i = 1
+            while p1.score < 200 and p2.score < 200:
+                matches += 1
+                print(f"\nMatch #{i}")
+                result = m.play()
+                print(f"Result: {result}")
+                m.boneyard.print_boneyard_tiles()
+                print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
+                print(f"P2: {m.player_2.hand}, Score: {m.player_2.score}")
+                if result == p1.name:
+                    p1_match += 1
+                if result == p2.name:
+                    p2_match += 1
+                i += 1
+
+            print()
+            if p1.score >= 200:
+                print(f"{p1.name} is the winner")
+                p1_game += 1
+            else:
+                print(f"{p2.name} is the winner")
+                p2_game += 1
+            
+        print("\n Match Stats")
+        print(f"P1 Match Winning Ratio: {p1_match / matches} after playing {matches} matches")
+        print(f"P2 Match Winning Ratio: {p2_match / matches} after playing {matches} matches")
+
+        print("\n Game Stats")
+        print(f"P1 Game Winning Ratio: {p1_game / games} after playing {games} games")
+        print(f"P2 Game Winning Ratio: {p2_game / games} after playing {games} games")
+>>>>>>> 505f53c0f49074d1e3c5f9cf1f3ba91f6aac39bd
 
     print("------------------------")
