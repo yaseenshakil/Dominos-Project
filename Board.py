@@ -40,6 +40,8 @@ class Board():
                 # Invalid move
                 raise TypeError("Invalid Move")
 
+
+
     def print_board(self): 
         print(f"------Domino Board--------")
         for tile in self.board:
@@ -105,9 +107,10 @@ class Board():
 
 
     
-    def copy(self): 
+    def copy(self):
         new_board = Board()
-        new_board.board = self.board.copy()
+        # deep copy the tile list
+        new_board.board = [tile for tile in self.board]  # creates a new list
         return new_board
 
 # Testing Section   

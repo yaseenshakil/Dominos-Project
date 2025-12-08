@@ -200,6 +200,9 @@ if __name__ == "__main__":
     print("------------------------")
     print("Testing Match Class")
     test_number = int(input("Test #: "))
+    run_times = int(input("Number of Games #: "))
+    if run_times > 100:
+        run_times = 100
 
     if test_number == 1:
         print("Initialization")
@@ -228,13 +231,21 @@ if __name__ == "__main__":
         print(f"P2: {m.player_2.hand}")
 
     if test_number == 3:
-        p1 = ExpectiMinimaxPlayer()
-        p2 = Player()
-        m = Match(p1,p2)
-        m.play()
-        m.boneyard.print_boneyard_tiles()
-        print(f"P1: {m.player_1.hand}")
-        print(f"P2: {m.player_2.hand}")
+        p1_wins = 0
+        p2_wins = 0
+        for game in range(run_times):
+            p1 = ExpectiMinimaxPlayer()
+            p2 = Player()
+            m = Match(p1,p2)
+            m.play()
+            m.boneyard.print_boneyard_tiles()
+            print(f"P1: {m.player_1.hand}")
+            print(f"P2: {m.player_2.hand}")
+            if (len(m.player_1.hand) == 0):
+                p1_wins += 1
+            else:
+                p2_wins += 1
+        print(f"Player 1 Expectiminimax won: {p1_wins} times and Player 2 Random won: {p2_wins} times out of a total of {run_times} games")
 
 
     print("------------------------")

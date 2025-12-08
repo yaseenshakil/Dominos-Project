@@ -4,96 +4,121 @@ from Game import Game
 from game_types import Domino, NUMBER_OF_TILES, ALL_TILES, Move
 import math
 
-
-
+DEPTH = 4
 class ExpectiMinimaxPlayer(Player): 
-    def __init__(self, name : str = "ExpectiMinimax"): 
+    
+    def __init__(self, name: str = "ExpectiMinimax"): 
         super().__init__(name)
 
+    # --- Opponent tile probabilities ---
     def obtain_opponent_tile_probabilities(self, board: Board) -> list[tuple[Domino, float]]: 
         board_tiles = board.get_board_tiles()
         player_hand = self.get_hand()
         tiles_left = NUMBER_OF_TILES - (len(board_tiles) + len(player_hand))
         tile_probabilities = []
+        if tiles_left <= 0:
+            return []
         for tile in ALL_TILES: 
             if (tile not in board_tiles and tile not in player_hand): 
                 tile_probabilities.append((tile, 1/tiles_left))
         return tile_probabilities
     
-    def check_terminal(self, board: Board, boneyard_size: int) -> bool: 
-        if (NUMBER_OF_TILES - (len(board.get_board_tiles()) + boneyard_size + len(self.get_hand())) == 0): 
-            return True
-        return False
-    
-    def eval(self, board: Board, boneyard_size: int):
-        ## Evaluation function 
-        player_tiles = self.get_hand()
-        # You must store opponent tile count somewhere in Match; likely board or game state manages this
+    # --- Evaluation function ---
+    def eval(self, board: Board, boneyard_size: int, hand: list[Domino]):
+        """Evaluate board from the perspective of a simulated hand."""
+        player_tiles = hand
         opp_tile_count = NUMBER_OF_TILES - (boneyard_size + len(player_tiles) + len(board.get_board_tiles()))
-
-        # 1. Reward lower pip sum
         pip_score = -sum(a+b for (a,b) in player_tiles)
-
-        # 2. Reward legal moves (mobility)
-        mobility = len(self.possible_moves(board))
-
-        # 3. Reward having fewer tiles than opponent
+        mobility = len(self.possible_moves(board, player_tiles))
         tile_count_score = (opp_tile_count - len(player_tiles))
-
-        # Weighted sum
         return pip_score + 2*mobility + 5*tile_count_score
 
-    def move(self, board : Board, boneyard_size : int) -> Move | None:
-        value, action = self.max_node(board, boneyard_size, depth=3)
-        return action
+    # --- possible_moves supports simulated hands ---
+    def possible_moves(self, board: Board, hand: list[Domino] | None = None) -> list[Move]:
+        if hand is None:
+            hand = self.get_hand()  # default to real hand
+
+        moves = []
+        tail_numbers = board.get_tails()
+
+        for tile in hand:
+            tile_flip = (tile[-1], tile[0])
+            # if (tile in board.get_board_tiles() or tile_flip in board.get_board_tiles()):
+            #     continue
+            if board.is_empty() or tail_numbers[0] in tile:
+                moves.append((tile, 0))
+            if not board.is_empty() and tail_numbers[-1] != tail_numbers[0] and tail_numbers[-1] in tile:
+                moves.append((tile, -1))
+        return moves
     
-    def max_node(self, board: Board, boneyard_size: int, depth: int):
-        # Check if depth is reached or a terminal stage is reached 
-        if (depth == 0): 
-            score = self.eval(board, boneyard_size)
-            return score, None
+    def check_terminal(self, board: Board, hand, boneyard_size):
+        if (NUMBER_OF_TILES - (len(board.get_board_tiles()) + len(hand) + boneyard_size) <= 0): return True
+        return False 
+
+
+    # --- Entry point ---
+    def move(self, board: Board, boneyard_size: int) -> Move | None:
+        print(f"Initial board: {board.get_board_tiles()}")
+        value, action = self.max_node(board, boneyard_size, depth=DEPTH, hand=self.get_hand().copy())
+        print(f"!!!!! ACTION RETURNED!!!!!!! {action}")
+        return action
+
+    # --- Max node ---
+    def max_node(self, board: Board, boneyard_size: int, depth: int, hand: list[Domino]):
+        if (depth == 0 or not hand or self.check_terminal(board, hand, boneyard_size)):
+            return self.eval(board, boneyard_size, hand), None
 
         optimal_max_val = -math.inf
         optimal_max_move = None
-
-        for action in self.possible_moves(board): 
+        moves = self.possible_moves(board, hand)
+        print(f"max_node | board: {board.get_board_tiles()} | hand: {hand} | moves: {self.possible_moves(board, hand)}")
+        # Generate moves based on the current hand copy
+        if not moves:
+            return self.eval(board, boneyard_size, hand), None
+        for action in moves:
             board_copy = board.copy()
             board_copy.add_to_board(action)
 
-            value = self.chance_node(board_copy, boneyard_size, depth - 1)
-            if value > optimal_max_val: 
+            # Simulate hand after playing this tile
+            hand_copy = hand.copy()
+            hand_copy.remove(action[0])
+
+            value = self.chance_node(board_copy, boneyard_size, depth - 1, hand_copy)
+            if value > optimal_max_val:
                 optimal_max_val = value
                 optimal_max_move = action
 
         return optimal_max_val, optimal_max_move
 
-
-    def chance_node(self, board: Board, boneyard_size: int, depth: int): 
+    # --- Chance node ---
+    def chance_node(self, board: Board, boneyard_size: int, depth: int, hand: list[Domino]):
         tile_probabilities = self.obtain_opponent_tile_probabilities(board)
-
-        total = 0 
-        for tile, prob in tile_probabilities: 
-            min_value = self.min_node(board, boneyard_size, depth, tile)
+        total = 0
+        for tile, prob in tile_probabilities:
+            min_value = self.min_node(board, boneyard_size, depth, tile, hand)
             total += min_value * prob
-
         return total
 
+    # --- Min node ---
+    def min_node(self, board: Board, boneyard_size: int, depth: int, tile: Domino, hand: list[Domino]):
+        if (depth == 0 or not hand or self.check_terminal(board, hand, boneyard_size)):
+            return self.eval(board, boneyard_size, hand)
 
-    def min_node(self, board: Board, boneyard_size: int, depth: int, tile: Domino):
-
-        opponent_moves = board.get_moves_for_tiles(tile)
-
+        opponent_moves = [
+            m for m in board.get_moves_for_tiles(tile)
+            if m[0] not in board.get_board_tiles() and (m[0][1], m[0][0]) not in board.get_board_tiles()
+        ]
         if not opponent_moves:
-            # If opponent passes, you take another max turn
-            return self.eval(board, boneyard_size)
+            # Opponent passes, simulate next max turn
+            return self.max_node(board, boneyard_size, depth - 1, hand)[0]
 
-        worst = math.inf
-
+        worst_value = math.inf
         for action in opponent_moves:
+            print(f"Min Node | Action about to execute: {action[0]} in {action[1]}")
             board_copy = board.copy()
             board_copy.add_to_board(action)
+            print(f"Min Node: Executed Action: {action}")
+            value, _ = self.max_node(board_copy, boneyard_size, depth - 1, hand.copy())
+            worst_value = min(worst_value, value)
 
-            value, _ = self.max_node(board_copy, boneyard_size, depth - 1)
-            worst = min(worst, value)
-
-        return worst
+        return worst_value

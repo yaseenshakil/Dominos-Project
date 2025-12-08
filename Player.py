@@ -84,6 +84,17 @@ class Player():
             return random.choice(moves)
         else:
             return None
+        
+    def copy(self):
+        """Return a shallow copy of the player with a copied hand."""
+        new_player = Player(self.name)
+        new_player.hand = self.hand.copy()
+        return new_player
+
+    def remove_tile(self, tile):
+        """Remove a tile from the player's hand."""
+        if tile in self.hand:
+            self.hand.remove(tile)
 # Testing Section   
 if __name__ == "__main__":
     print("------------------------")
