@@ -4,6 +4,7 @@ from Player import Player
 from Board import Board
 from HumanPlayer import HumanPlayer
 from MonteCarloPlayer import MonteCarloPlayer
+from ExpectiMinimaxPlayer import ExpectiMinimaxPlayer
 
 class Match(): 
     """Class to represent a match between two agents/players
@@ -347,6 +348,92 @@ if __name__ == "__main__":
             # Match until score = 200
             p1 = MonteCarloPlayer(n = 2000)
             p2 = Player()
+            m = Match(p1, p2, False)
+            i = 1
+            while p1.score < 200 and p2.score < 200:
+                matches += 1
+                print(f"\nMatch #{i}")
+                result = m.play()
+                print(f"Result: {result}")
+                m.boneyard.print_boneyard_tiles()
+                print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
+                print(f"P2: {m.player_2.hand}, Score: {m.player_2.score}")
+                if result == p1.name:
+                    p1_match += 1
+                if result == p2.name:
+                    p2_match += 1
+                i += 1
+
+            print()
+            if p1.score >= 200:
+                print(f"{p1.name} is the winner")
+                p1_game += 1
+            else:
+                print(f"{p2.name} is the winner")
+                p2_game += 1
+            
+        print("\n Match Stats")
+        print(f"P1 Match Winning Ratio: {p1_match / matches} after playing {matches} matches")
+        print(f"P2 Match Winning Ratio: {p2_match / matches} after playing {matches} matches")
+
+        print("\n Game Stats")
+        print(f"P1 Game Winning Ratio: {p1_game / games} after playing {games} games")
+        print(f"P2 Game Winning Ratio: {p2_game / games} after playing {games} games")
+
+    if test_number == 9:
+        games = 10
+        p1_match = 0
+        p2_match = 0
+        p1_game = 0
+        p2_game = 0
+        matches = 0
+        for _ in range(games):
+            # Match until score = 200
+            p1 = ExpectiMinimaxPlayer()
+            p2 = Player()
+            m = Match(p1, p2, False)
+            i = 1
+            while p1.score < 200 and p2.score < 200:
+                matches += 1
+                print(f"\nMatch #{i}")
+                result = m.play()
+                print(f"Result: {result}")
+                m.boneyard.print_boneyard_tiles()
+                print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
+                print(f"P2: {m.player_2.hand}, Score: {m.player_2.score}")
+                if result == p1.name:
+                    p1_match += 1
+                if result == p2.name:
+                    p2_match += 1
+                i += 1
+
+            print()
+            if p1.score >= 200:
+                print(f"{p1.name} is the winner")
+                p1_game += 1
+            else:
+                print(f"{p2.name} is the winner")
+                p2_game += 1
+            
+        print("\n Match Stats")
+        print(f"P1 Match Winning Ratio: {p1_match / matches} after playing {matches} matches")
+        print(f"P2 Match Winning Ratio: {p2_match / matches} after playing {matches} matches")
+
+        print("\n Game Stats")
+        print(f"P1 Game Winning Ratio: {p1_game / games} after playing {games} games")
+        print(f"P2 Game Winning Ratio: {p2_game / games} after playing {games} games")
+
+    if test_number == 10:
+        games = 10
+        p1_match = 0
+        p2_match = 0
+        p1_game = 0
+        p2_game = 0
+        matches = 0
+        for _ in range(games):
+            # Match until score = 200
+            p1 = ExpectiMinimaxPlayer()
+            p2 = MonteCarloPlayer()
             m = Match(p1, p2, False)
             i = 1
             while p1.score < 200 and p2.score < 200:

@@ -58,9 +58,7 @@ class ExpectiMinimaxPlayer(Player):
 
     # --- Entry point ---
     def move(self, board: Board, boneyard_size: int) -> Move | None:
-        print(f"Initial board: {board.get_board_tiles()}")
         value, action = self.max_node(board, boneyard_size, depth=DEPTH, hand=self.get_hand().copy())
-        print(f"!!!!! ACTION RETURNED!!!!!!! {action}")
         return action
 
     # --- Max node ---
@@ -71,7 +69,6 @@ class ExpectiMinimaxPlayer(Player):
         optimal_max_val = -math.inf
         optimal_max_move = None
         moves = self.possible_moves(board, hand)
-        print(f"max_node | board: {board.get_board_tiles()} | hand: {hand} | moves: {self.possible_moves(board, hand)}")
         # Generate moves based on the current hand copy
         if not moves:
             return self.eval(board, boneyard_size, hand), None
@@ -114,10 +111,8 @@ class ExpectiMinimaxPlayer(Player):
 
         worst_value = math.inf
         for action in opponent_moves:
-            print(f"Min Node | Action about to execute: {action[0]} in {action[1]}")
             board_copy = board.copy()
             board_copy.add_to_board(action)
-            print(f"Min Node: Executed Action: {action}")
             value, _ = self.max_node(board_copy, boneyard_size, depth - 1, hand.copy())
             worst_value = min(worst_value, value)
 
