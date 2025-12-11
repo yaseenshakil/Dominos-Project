@@ -5,6 +5,7 @@ from Board import Board
 from HumanPlayer import HumanPlayer
 from MonteCarloPlayer import MonteCarloPlayer
 from ExpectiMinimaxPlayer import ExpectiMinimaxPlayer
+from time import time
 
 class Match(): 
     """Class to represent a match between two agents/players
@@ -104,10 +105,16 @@ class Match():
         # Make the first move
         self.take_move(first_player, (starting_tile, 0))
         
+        # Time Stats
+        first_player_times = []
+        second_player_times = []
+
         # Start the game
         while not self.terminal_state():
             # Second player takes a move
+            second_time = time()
             self.take_turn(second_player)
+            second_player_times.append(time() - second_time)
 
             # Display board
             if self.display:
@@ -118,7 +125,9 @@ class Match():
                 break
 
             # First player takes a move
+            first_time = time()
             self.take_turn(first_player)
+            first_player_times.append(time() - first_time)
 
             # Display board
             if self.display:
@@ -136,19 +145,32 @@ class Match():
                 # Show winner and current scores
                 print(f"Match Over: {first_player.name} wins")
                 print(f"Current Scores -> {first_player.name} : {first_player.score} | {second_player.name} : {second_player.score}")
-            return first_player.name
+            
+            if self.player_1.name == first_player.name:
+                return first_player.name, first_player_times, second_player_times
+            else:
+                return first_player.name, second_player_times, first_player_times
+            
         elif p2_score < p1_score:
             # Second player wins
             second_player.add_score(p1_score)
             if self.display:
                 print(f"Match Over: {second_player.name} wins")
                 print(f"Current Scores -> {first_player.name} : {first_player.score} | {second_player.name} : {second_player.score}")
-            return second_player.name
+            
+            if self.player_1.name == second_player.name:
+                return second_player.name, second_player_times, first_player_times
+            else:
+                return second_player.name, first_player_times, second_player_times
         else:
             # Tie
             if self.display:
                 print("Match Over: Tie")
-            return "Tie"
+            
+            if self.player_1.name == first_player.name:
+                return "Tie", first_player_times, second_player_times
+            else:
+                return "Tie", second_player_times, first_player_times
     
     def take_turn(self, player : Player):
         # Choose a move
@@ -191,14 +213,6 @@ class Match():
             # Else the game is not over
             return False
         
-
-
-
-
-
-
-    
-    
 
 # Testing Section   
 if __name__ == "__main__":
@@ -260,7 +274,7 @@ if __name__ == "__main__":
         i = 1
         while p1.score < 200 and p2.score < 200:
             print(f"\nMatch #{i}")
-            result = m.play()
+            result, _, _ = m.play()
             print(f"Result: {result}")
             m.boneyard.print_boneyard_tiles()
             print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
@@ -281,7 +295,7 @@ if __name__ == "__main__":
         i = 1
         while p1.score < 200 and p2.score < 200:
             print(f"\nMatch #{i}")
-            result = m.play()
+            result, _, _ = m.play()
             print(f"Result: {result}")
             m.boneyard.print_boneyard_tiles()
             print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
@@ -311,7 +325,7 @@ if __name__ == "__main__":
             while p1.score < 200 and p2.score < 200:
                 matches += 1
                 print(f"\nMatch #{i}")
-                result = m.play()
+                result, _, _ = m.play()
                 print(f"Result: {result}")
                 m.boneyard.print_boneyard_tiles()
                 print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
@@ -355,7 +369,7 @@ if __name__ == "__main__":
             while p1.score < 200 and p2.score < 200:
                 matches += 1
                 print(f"\nMatch #{i}")
-                result = m.play()
+                result, _, _ = m.play()
                 print(f"Result: {result}")
                 m.boneyard.print_boneyard_tiles()
                 print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
@@ -399,7 +413,7 @@ if __name__ == "__main__":
             while p1.score < 200 and p2.score < 200:
                 matches += 1
                 print(f"\nMatch #{i}")
-                result = m.play()
+                result, _, _ = m.play()
                 print(f"Result: {result}")
                 m.boneyard.print_boneyard_tiles()
                 print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
@@ -443,7 +457,7 @@ if __name__ == "__main__":
             while p1.score < 200 and p2.score < 200:
                 matches += 1
                 print(f"\nMatch #{i}")
-                result = m.play()
+                result, _, _ = m.play()
                 print(f"Result: {result}")
                 m.boneyard.print_boneyard_tiles()
                 print(f"P1: {m.player_1.hand}, Score: {m.player_1.score}")
