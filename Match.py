@@ -383,7 +383,7 @@ if __name__ == "__main__":
         print(f"P2 Game Winning Ratio: {p2_game / games} after playing {games} games")
 
     if test_number == 9:
-        games = 10
+        games = 50
         p1_match = 0
         p2_match = 0
         p1_game = 0
@@ -435,8 +435,8 @@ if __name__ == "__main__":
         matches = 0
         for j in range(games):
             # Match until score = 200
-            p1 = ExpectiMinimaxPlayer()
-            p2 = MonteCarloPlayer(n = 3000)
+            p1 = ExpectiMinimaxPlayer(depth=5)
+            p2 = MonteCarloPlayer(n = 1000)
             m = Match(p1, p2, False)
             i = 1
             print(f"\nGame #{j+1}")
