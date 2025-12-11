@@ -40,8 +40,6 @@ class Board():
                 # Invalid move
                 raise TypeError("Invalid Move")
 
-
-
     def print_board(self): 
         print(f"------Domino Board--------")
         for tile in self.board:
@@ -104,8 +102,6 @@ class Board():
             moves.append((domino, -1))
 
         return moves
-
-
     
     def copy(self):
         new_board = Board()
