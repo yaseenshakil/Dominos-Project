@@ -4,16 +4,13 @@ from ExpectiMinimaxPlayer import ExpectiMinimaxPlayer
 from Match import Match
 import numpy as np
 import json
-import os
+
+# Set number of games for each evaluation type
+games_default = 100 # Default number of games for standard evaluations against Random Player
+games_exploration = 30 # Number of games for hyperparameter exploration evaluations
+games_comparison = 50 # Number of games for comparison evaluations between two intelligent agents
 
 def save_dict_to_file(data_dict, filename):
-    """
-    Saves a dictionary to a newly created JSON file.
-    If the file already exists, it raises an error.
-    """
-    if os.path.exists(filename):
-        raise FileExistsError(f"File '{filename}' already exists.")
-
     with open("stats/" + filename, 'w') as f:
         json.dump(data_dict, f, indent=4)
 
@@ -92,61 +89,69 @@ def full_game_evaluation(p1 : Player, p2 : Player, games : int, score_to_win: in
 
 if __name__ == "__main__":
     print("Main Program for Dominos Game")
+    options = input("Options: \n1. Run Full Game Evaluations\n2. Run Default Evaluations\n3. Run Exploratory Evaluations\n4. Run Comparison Evaluations\nSelect Option #: ")
 
-    games_default = 1#100
-    games_exploration = 1#30
-    games_comparison = 1#100
-
-    # ExpectiMinimax Agent Evaluation (Against Random Player)
-    p1 = ExpectiMinimaxPlayer("ExpectiMinimax Player")
-    p2 = Player("Random Player")
-
-    print("\nEvaluating ExpectiMinimax Player vs Random Player")
-    results = full_game_evaluation(p1, p2, games_default)
-    save_dict_to_file(results, "expectiminimax_vs_random_stats_default.json")
-
-    # Monte Carlo Agent Evaluation (Against Random Player)
-    p1 = MonteCarloPlayer("Monte Carlo Player")
-    p2 = Player("Random Player")
-
-    print("\nEvaluating Monte Carlo Player vs Random Player")
-    results = full_game_evaluation(p1, p2, games_default)
-    save_dict_to_file(results, "montecarlo_vs_random_stats_default.json")
-
-    # ExpectiMinimax - Hyperparameter Exploration
-    depths = [4, 5, 6, 7]
-    for depth in depths:
-        p1 = ExpectiMinimaxPlayer(f"ExpectiMinimax Player", depth=depth)
+    if options == "1" or options == "2":
+        # ExpectiMinimax Agent Evaluation (Against Random Player)
+        p1 = ExpectiMinimaxPlayer("ExpectiMinimax Player")
         p2 = Player("Random Player")
 
-        print(f"\nEvaluating ExpectiMinimax Player (Depth={depth}) vs Random Player")
-        results = full_game_evaluation(p1, p2, games_exploration)
-        save_dict_to_file(results, f"expectiminimax_vs_random_stats_depth_{depth}.json")
-    
-    # Monte Carlo - Hyperparameter Exploration (Iterations)
-    iterations_list = [1000, 2000, 3000, 4000]
-    for iterations in iterations_list:
-        p1 = MonteCarloPlayer(f"Monte Carlo Player", n=iterations)
+        print("\nEvaluating ExpectiMinimax Player vs Random Player")
+        results = full_game_evaluation(p1, p2, games_default)
+        save_dict_to_file(results, "expectiminimax_vs_random_stats_default.json")
+
+        # Monte Carlo Agent Evaluation (Against Random Player)
+        p1 = MonteCarloPlayer("Monte Carlo Player")
         p2 = Player("Random Player")
 
-        print(f"\nEvaluating Monte Carlo Player (Iterations={iterations}) vs Random Player")
-        results = full_game_evaluation(p1, p2, games_exploration)
-        save_dict_to_file(results, f"montecarlo_vs_random_stats_iterations_{iterations}.json")
-    
-    # Monte Carlo - Hyperparameter Exploration (Exploration Constant)
-    exploration_constants = [0.5, 0.7, 0.9]
-    for c in exploration_constants:
-        p1 = MonteCarloPlayer(f"Monte Carlo Player", c=c)
-        p2 = Player("Random Player")
+        print("\nEvaluating Monte Carlo Player vs Random Player")
+        results = full_game_evaluation(p1, p2, games_default)
+        save_dict_to_file(results, "montecarlo_vs_random_stats_default.json")
 
-        print(f"\nEvaluating Monte Carlo Player (Exploration Constant={c}) vs Random Player")
-        results = full_game_evaluation(p1, p2, games_exploration)
-        save_dict_to_file(results, f"montecarlo_vs_random_stats_exploration_{c}.json")
+    if options == "1" or options == "3":
+        # ExpectiMinimax - Hyperparameter Exploration
+        depths = [4, 5, 6, 7]
+        for depth in depths:
+            p1 = ExpectiMinimaxPlayer(f"ExpectiMinimax Player", depth=depth)
+            p2 = Player("Random Player")
 
-    # Comparison between ExpectiMinimax and Monte Carlo
-    p1 = ExpectiMinimaxPlayer("ExpectiMinimax Player", depth=5)
-    p2 = MonteCarloPlayer("Monte Carlo Player", n=3000)
+            print(f"\nEvaluating ExpectiMinimax Player (Depth={depth}) vs Random Player")
+            results = full_game_evaluation(p1, p2, games_exploration)
+            save_dict_to_file(results, f"expectiminimax_vs_random_stats_depth_{depth}.json")
+        
+        # Monte Carlo - Hyperparameter Exploration (Iterations)
+        iterations_list = [1000, 2000, 3000, 4000]
+        for iterations in iterations_list:
+            p1 = MonteCarloPlayer(f"Monte Carlo Player", n=iterations)
+            p2 = Player("Random Player")
 
-    print("\nEvaluating ExpectiMinimax Player vs Monte Carlo Player")
-    results = full_game_evaluation(p1, p2, games_comparison)
-    save_dict_to_file(results, "expectiminimax_vs_montecarlo_stats.json")
+            print(f"\nEvaluating Monte Carlo Player (Iterations={iterations}) vs Random Player")
+            results = full_game_evaluation(p1, p2, games_exploration)
+            save_dict_to_file(results, f"montecarlo_vs_random_stats_iterations_{iterations}.json")
+        
+        # Monte Carlo - Hyperparameter Exploration (Exploration Constant)
+        exploration_constants = [0.5, 0.7, 0.9]
+        for c in exploration_constants:
+            p1 = MonteCarloPlayer(f"Monte Carlo Player", c=c)
+            p2 = Player("Random Player")
+
+            print(f"\nEvaluating Monte Carlo Player (Exploration Constant={c}) vs Random Player")
+            results = full_game_evaluation(p1, p2, games_exploration)
+            save_dict_to_file(results, f"montecarlo_vs_random_stats_exploration_{c}.json")
+
+    if options == "1" or options == "4":
+        # Comparison between ExpectiMinimax and Monte Carlo
+        p1 = ExpectiMinimaxPlayer("ExpectiMinimax Player", depth=5)
+        p2 = MonteCarloPlayer("Monte Carlo Player", n=1000)
+
+        print("\nEvaluating ExpectiMinimax Player (Depth = 5) vs Monte Carlo Player (Iterations = 1000)")
+        results = full_game_evaluation(p1, p2, games_comparison)
+        save_dict_to_file(results, "expectiminimax(d5)_vs_montecarlo(n1000)_stats.json")
+
+        # Comparison between ExpectiMinimax and Monte Carlo
+        p1 = ExpectiMinimaxPlayer("ExpectiMinimax Player", depth=6)
+        p2 = MonteCarloPlayer("Monte Carlo Player", n=4000)
+
+        print("\nEvaluating ExpectiMinimax Player (Depth = 6) vs Monte Carlo Player (Iterations = 4000)")
+        results = full_game_evaluation(p1, p2, games_comparison)
+        save_dict_to_file(results, "expectiminimax(d6)_vs_montecarlo(n4000)_stats.json")
