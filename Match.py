@@ -301,12 +301,13 @@ if __name__ == "__main__":
         p1_game = 0
         p2_game = 0
         matches = 0
-        for _ in range(games):
+        for j in range(games):
             # Match until score = 200
             p1 = MonteCarloPlayer()
             p2 = Player()
             m = Match(p1, p2, False)
             i = 1
+            print(f"\nGame #{j+1}")
             while p1.score < 200 and p2.score < 200:
                 matches += 1
                 print(f"\nMatch #{i}")
@@ -338,18 +339,19 @@ if __name__ == "__main__":
         print(f"P2 Game Winning Ratio: {p2_game / games} after playing {games} games")
 
     if test_number == 8:
-        games = 100
+        games = 10
         p1_match = 0
         p2_match = 0
         p1_game = 0
         p2_game = 0
         matches = 0
-        for _ in range(games):
+        for j in range(games):
             # Match until score = 200
-            p1 = MonteCarloPlayer(n = 2000)
+            p1 = MonteCarloPlayer(n = 3000)
             p2 = Player()
             m = Match(p1, p2, False)
             i = 1
+            print(f"\nGame #{j+1}")
             while p1.score < 200 and p2.score < 200:
                 matches += 1
                 print(f"\nMatch #{i}")
@@ -387,12 +389,13 @@ if __name__ == "__main__":
         p1_game = 0
         p2_game = 0
         matches = 0
-        for _ in range(games):
+        for j in range(games):
             # Match until score = 200
             p1 = ExpectiMinimaxPlayer()
             p2 = Player()
             m = Match(p1, p2, False)
             i = 1
+            print(f"\nGame #{j+1}")
             while p1.score < 200 and p2.score < 200:
                 matches += 1
                 print(f"\nMatch #{i}")
@@ -430,12 +433,13 @@ if __name__ == "__main__":
         p1_game = 0
         p2_game = 0
         matches = 0
-        for _ in range(games):
+        for j in range(games):
             # Match until score = 200
             p1 = ExpectiMinimaxPlayer()
-            p2 = MonteCarloPlayer()
+            p2 = MonteCarloPlayer(n = 3000)
             m = Match(p1, p2, False)
             i = 1
+            print(f"\nGame #{j+1}")
             while p1.score < 200 and p2.score < 200:
                 matches += 1
                 print(f"\nMatch #{i}")

@@ -8,9 +8,10 @@ import random
 from typing import Literal, Self
 import numpy as np
 
- 
+# Describe a state in the game
 class State():
     def __init__(self, player_hand : list[Domino], opponent_hand : list[Domino], boneyard : Boneyard, board : Board, turn : Literal[0, 1]):
+        # A state is described by each player's hand, the boneyard, and the board
         self.player = Player()
         self.player.set_hand(player_hand)
         self.opponent = Player()
@@ -20,25 +21,36 @@ class State():
 
     def transition(self, move : Move | None) -> Self:
         # Return updated state based on the move
+
+        # Based on a copy of the current state
         new_state = deepcopy(self)
 
+        # Handling PASS condition (Move = 0) (No move, and empty boneyard)
         if move != 0:
-            # Handling PASS condition
             if move:
+                # Place a tile
                 new_state.board.add_to_board(move)
                 new_state.player.hand.remove(move[0])
             elif not new_state.boneyard.is_boneyard_empty():
-                new_tile = new_state.boneyard.generate_random_tile()
-                new_state.player.hand.append(new_tile)
+                # Draw from boneyard
+                while len(new_state.player.possible_moves(new_state.board)) == 0 and not new_state.boneyard.is_boneyard_empty():
+                    new_tile = new_state.boneyard.generate_random_tile()
+                    new_state.player.hand.append(new_tile)
 
-        op_actions = new_state.opponent.possible_moves(new_state.board)
-        if len(op_actions) > 0:
-            op_action = random.choice(op_actions)
-            new_state.board.add_to_board(op_action)
-            new_state.opponent.hand.remove(op_action[0])
-        elif not new_state.boneyard.is_boneyard_empty():
-            new_tile = new_state.boneyard.generate_random_tile()
-            new_state.opponent.hand.append(new_tile)
+        if move or move == 0:
+            # The opponent is modeled as a random player
+            # The opponent moves if the players makes a move or passes
+            op_actions = new_state.opponent.possible_moves(new_state.board)
+            if len(op_actions) > 0:
+                # Random move
+                op_action = random.choice(op_actions)
+                new_state.board.add_to_board(op_action)
+                new_state.opponent.hand.remove(op_action[0])
+            elif not new_state.boneyard.is_boneyard_empty():
+                # Draw from boneyard if available
+                while len(new_state.opponent.possible_moves(new_state.board)) == 0 and not new_state.boneyard.is_boneyard_empty():
+                    new_tile = new_state.boneyard.generate_random_tile()
+                    new_state.opponent.hand.append(new_tile)
 
         return new_state
 
@@ -59,46 +71,66 @@ class State():
             return False
     
     def utility(self) -> int:
+        # The utility denpends on the total score of each player's hand
         player_score = self.player.hand_score()
         opponent_score = self.opponent.hand_score()
+
         if player_score < opponent_score:
+            # If the player has a lower scored hand
+            # The player wins and gets the opponent's hand
+            # as their score
             return opponent_score
         elif opponent_score < player_score:
+            # If the player has a higher scored hand
+            # The player loses and the opponent gets the
+            # players hand as their score
             return -player_score
         else:
+            # No utility in a tie
             return 0
 
     def possible_actions(self) -> list[Move | None | Literal[0]]:
+        # The possible actions from a given state are:
+
+        # The possible moves, if any
         actions = self.player.possible_moves(self.board)
         if len(actions) == 0 and not self.boneyard.is_boneyard_empty():
+            # If no moves possible, and drawing is available 
             actions = [None]
         if len(actions) == 0 and not self.is_terminal():
+            # If no moves possible, and the boneyard is empty
+            # Also not a terminal state
             actions = [0]
         return actions
     
-
+# Node in a Monte Carlo Tree
 class Node():
     def __init__(self):
-        self.parent : Node = None
-        self.action = None
-        self.visit_count = 0
-        self.total_reward = 0
-        self.availability = 0
-        self.children : list[Node] = []
-        self.d : State = None
+        self.parent : Node = None # Parent node
+        self.action = None # Action that caused that produced the node
+        self.visit_count = 0 # Number of times a node is visited
+        self.total_reward = 0 # Sum of utilities
+        self.availability = 0 # Number of alternative nodes available for selection
+        self.children : list[Node] = [] # List of children
+        self.d : State = None # Determinization of the corresponding node
     
     def c(self, d : State) -> list[Self]:
+        # Children of node b compatible with determinization
         actions = d.possible_actions()
         return [child for child in self.children if child.action in actions]
 
     def u(self, d : State) -> list[Move | None | Literal[0]]:
-        # List of possible actions from a node given a determinization
+        # List of possible unexplored actions from a node given a determinization 
+
+        # Possible actions
         actions = d.possible_actions()
 
+        # Explored actions
         expanded_actions = [child.action for child in self.children]
 
+        # Unexplored actions
         unexplored_actions = [a for a in actions if a not in expanded_actions]
-        
+    
         return unexplored_actions
 
 class MonteCarloPlayer(Player):
@@ -130,9 +162,6 @@ class MonteCarloPlayer(Player):
         self.last_hand_size = len(self.hand)
 
     def move(self, board : Board, boneyard_size : int) -> Move | None:
-        # Update certainties with every move
-        self.update_certainty(board, boneyard_size)
-
         # Possible moves
         moves = self.possible_moves(board)
 
@@ -150,7 +179,7 @@ class MonteCarloPlayer(Player):
             self.record_last_state(new_board, boneyard_size)
             return moves[0]
         
-        # If more than 1 option, run MCTS
+        # If more than 1 option, run Single Observer Information Set Monte Carlo Tree Search (SO-ISMCTS)
 
         # Determine the list of possible determinizations
         determinizations = self.possible_determinizations(board, boneyard_size)
@@ -163,52 +192,81 @@ class MonteCarloPlayer(Player):
             # Select a random determinization
             d0 = random.choice(determinizations)
 
+            # Select a node from the tree
             v, d = self.select(v0, d0)
+
+            # If possible, expand the node
             if len(v.u(d)) > 0:
                 v, d = self.expand(v, d)
+            
+            # Simulate with determinization
+            # Calculate utility
             r = self.simulate(d)
-            self.backpropagate(r, v, d)
+
+            # Backpropagate utility through the tree
+            self.backpropagate(r, v)
         
+        # Form the children of the root node
+        # The action that creates the child with the most visits
+        # is the chosen move
         children = v0.children
         n = np.asarray([c.visit_count for c in children])
         move = children[np.argmax(n)].action
 
-        # When a move is selected, the board changes are recorded
-        new_board = deepcopy(board)
-        new_board.add_to_board(move)
-        self.record_last_state(new_board, boneyard_size)
         return move
         
     
     def select(self, v : Node, d : State) -> tuple[Node, State]:
+        # Node selection
+
         while not d.is_terminal() and len(v.u(d)) == 0:
             # List of children
             children = v.c(d)
             values = []
+
+            # UCB calculatation for each child
             for c in children:
                 value = c.total_reward / c.visit_count + 0.7 * np.sqrt(np.log(c.availability) / c.visit_count)
                 values.append(value)
             
+            # A child with the best UCB is chosen as the new node
             values = np.asarray(values)
             idx = np.argmax(values)
             v = children[idx]
+
+            # A new determinization (state) is obtained from
+            # Applyin the action of that child
             d = d.transition(children[idx].action)
+
+            # Repeat until the no unexplored actions in the chosen node or terminal state
+        
+        # Return the selected node
         return v, d
 
     def expand(self, v : Node, d : State) -> tuple[Node, State]:
+        # Node expansion
+
+        # Choose a random action
         a = random.choice(v.u(d))
 
+        # Definition of the child node 
+        # with action and determinization
         w = Node()
         w.parent = v
         w.action = a
         w.d = d
 
+        # Child is added to the children list
         v.children.append(w)
+
+        # Determinization is updated
         d = d.transition(a)
 
+        # Return child of the expanded node
         return w, d
     
     def simulate(self, d : State) -> int:
+        # Simulate with random actions until terminal state
         while not d.is_terminal():
             actions = d.possible_actions()
             if actions:
@@ -216,80 +274,30 @@ class MonteCarloPlayer(Player):
                 d = d.transition(a)
             else:
                 d = d.transition(None)
-
+        # Return the utility of the simulated terminal state
         return d.utility()
     
-    def backpropagate(self, r : int, v_l : Node, d0 : State):
+    def backpropagate(self, r : int, v_l : Node):
+        # Starting from the given node
         v = v_l
+
         while v.parent:
-            v.visit_count += 1
-            v.total_reward += r
+            # Backpropagate to the ancestors until reaching root node
+            v.visit_count += 1 # Add visit count
+            v.total_reward += r # Add utility to total reward
+
+            # Add availability to siblings compatible with determinization
             children = v.parent.c(v.d)
             for c in children: 
                 c.availability += 1
+
+            # Move to next ancestor
             v = v.parent
         
-        # Root node
+        # Updating Root node
         v.visit_count += 1
         v.total_reward += r
         v.availability += 1
-
-    
-    def update_certainty(self, board : Board, boneyard_size : int):
-        # Determine tile numbers that the opponent does not have
-
-        # This also initializes if another match starts
-        # If the board has less tiles than the last checkpoint,
-        # Then another match has started
-        if len(board.get_board_tiles()) < len(self.last_board.get_board_tiles()):
-            # Checkpoints and certainty initialization
-            self.last_board : Board = Board()
-            self.last_boneyard_size : int = 14
-            self.last_hand_size : int = 0
-            self.certainties : list[int] = []
-
-        
-        # How much has the board changed? What tiles have been added?
-        added_tiles : list[Domino] = []
-        for tile in board.get_board_tiles():
-            if tile not in self.last_board.get_board_tiles():
-                added_tiles.append(tile)
-        
-        # How much has the boneyard changed?
-        boneyard_diff = self.last_boneyard_size - boneyard_size
-
-        # How much has the player's hand changed?
-        hand_diff = len(self.hand)  - self.last_hand_size
-
-        # Certainties are only updated if the call is not a result 
-        # of drawing from the boneyard. That is, the board has not 
-        # changed, the boneyard has decreased, and the players hand
-        # has increased
-
-        if not (boneyard_diff > 0 and hand_diff > 0):
-            # If the board has changed less than the boneyard,
-            # forget every certainty
-            if boneyard_diff > len(added_tiles):
-                self.certainties = []
-
-            # If the board, then it is certain 
-            # that the opponent does not have the ends of the board
-            if len(added_tiles) == 0 and len(board.get_board_tiles()) > 0:
-                (end_1, end_2) = board.get_tails()
-                if end_1 not in self.certainties:
-                    self.certainties.append(end_1)
-                if end_2 not in self.certainties:
-                    self.certainties.append(end_2)
-            
-            # If the board and the boneyard change by exactly one, it is
-            # certain theat the opponent does not have the unplayed end, 
-            # nor the end before played tile (ends of the old board)
-            if len(added_tiles) == 1 and boneyard_diff == 1:
-                (end_1, end_2) = self.last_board.get_tails()
-                if end_1 not in self.certainties:
-                    self.certainties.append(end_1)
-                if end_2 not in self.certainties:
-                    self.certainties.append(end_2)
 
     def possible_determinizations(self, board : Board, boneyard_size : int) -> list[State]:
         # Initial list of dominos that might be on the boneyard or the opponent hand
@@ -302,8 +310,6 @@ class MonteCarloPlayer(Player):
                 reverse = (tile[-1], tile[0])
                 if reverse not in self.get_hand() and reverse not in board.get_board_tiles():
                     # Given that they do not have the certainties
-                    #if tile[0] not in self.certainties and tile[1] not in self.certainties :
-                    # Testing without the certainties
                     initial_list.append(tile)
         
         # Number of tiles the opponent
@@ -311,7 +317,6 @@ class MonteCarloPlayer(Player):
 
         # The set of possible hands is every combination of of the initial list with 
         possible_hands : list[list[Domino]] = []
-
         for combo in combinations(initial_list, opponent_n):
             possible_hands.append(list(combo))
 
