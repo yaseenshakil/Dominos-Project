@@ -1,14 +1,14 @@
 from Player import Player
 from Board import Board 
-from Game import Game
 from game_types import Domino, NUMBER_OF_TILES, ALL_TILES, Move
 import math
 
 DEPTH = 4
 class ExpectiMinimaxPlayer(Player): 
     
-    def __init__(self, name: str = "ExpectiMinimax"): 
+    def __init__(self, name: str = "ExpectiMinimax", depth: int = 4): 
         super().__init__(name)
+        self.depth = depth
 
     # --- Opponent tile probabilities ---
     def obtain_opponent_tile_probabilities(self, board: Board) -> list[tuple[Domino, float]]: 
@@ -58,7 +58,7 @@ class ExpectiMinimaxPlayer(Player):
 
     # --- Entry point ---
     def move(self, board: Board, boneyard_size: int) -> Move | None:
-        value, action = self.max_node(board, boneyard_size, depth=DEPTH, hand=self.get_hand().copy())
+        value, action = self.max_node(board, boneyard_size, depth=self.depth, hand=self.get_hand().copy())
         return action
 
     # --- Max node ---
