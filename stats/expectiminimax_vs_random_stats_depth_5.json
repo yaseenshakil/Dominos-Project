@@ -1,0 +1,16 @@
+{
+    "p1_match_win_ratio": 0.6539379474940334,
+    "p2_match_win_ratio": 0.3269689737470167,
+    "p1_game_win_ratio": 0.8666666666666667,
+    "p2_game_win_ratio": 0.13333333333333333,
+    "p1_move_time_mean": 0.07714713796916323,
+    "p1_move_time_std": 0.17644508156824945,
+    "p1_move_time_max": 2.9745733737945557,
+    "p1_move_time_min": 0.0,
+    "p2_move_time_mean": 9.88378718540989e-07,
+    "p2_move_time_std": 4.2225096308774435e-05,
+    "p2_move_time_max": 0.0020036697387695312,
+    "p2_move_time_min": 0.0,
+    "matches_played": 419,
+    "games_played": 30
+}

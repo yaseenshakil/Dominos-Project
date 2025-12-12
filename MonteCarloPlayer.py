@@ -137,29 +137,11 @@ class MonteCarloPlayer(Player):
     def __init__(self, name : str = "MonteCarloPlayer", n : int = 1000, c : float = 0.7):
         super().__init__(name) 
 
-        # Last board after making a move
-        self.last_board : Board = Board()
-
-        # Last boneyard after making a move
-        self.last_boneyard_size : int = 14
-
-        # Last non-tile certainties (List of numbers from 0-6 it is certain that the opponent does not have)
-        self.certainties : list[int] = []
-
-        # Last length of player's hand
-        self.last_hand_size : int = 0
-
         # Number of MCTS iterations
         self.MCTS_N = n
 
         # Exploration constant
         self.MCTS_C = c
-
-    def record_last_state(self, board : Board, boneyard_size : int):
-        # Record last board and boneyard size
-        self.last_board = board
-        self.last_boneyard_size = boneyard_size
-        self.last_hand_size = len(self.hand)
 
     def move(self, board : Board, boneyard_size : int) -> Move | None:
         # Possible moves
@@ -167,16 +149,10 @@ class MonteCarloPlayer(Player):
 
         # If no possible move, return None
         if not moves:
-            # Board stays the same, but boneyard decreases if possible
-            self.record_last_state(deepcopy(board), boneyard_size - 1 if boneyard_size > 0 else boneyard_size)
             return None
         
         # If only one move, make that move
         if len(moves) == 1:
-            # Board gets updated by the move
-            new_board = deepcopy(board)
-            new_board.add_to_board(moves[0])
-            self.record_last_state(new_board, boneyard_size)
             return moves[0]
         
         # If more than 1 option, run Single Observer Information Set Monte Carlo Tree Search (SO-ISMCTS)
@@ -206,7 +182,7 @@ class MonteCarloPlayer(Player):
             # Backpropagate utility through the tree
             self.backpropagate(r, v)
         
-        # Form the children of the root node
+        # From the children of the root node
         # The action that creates the child with the most visits
         # is the chosen move
         children = v0.children
@@ -235,7 +211,7 @@ class MonteCarloPlayer(Player):
             v = children[idx]
 
             # A new determinization (state) is obtained from
-            # Applyin the action of that child
+            # Applying the action of that child
             d = d.transition(children[idx].action)
 
             # Repeat until the no unexplored actions in the chosen node or terminal state
